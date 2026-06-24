@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    container_name: multi-agentes-api
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENCODE_API_KEY=${OPENCODE_API_KEY:-}
+      - OPENCODE_MODEL=kimi-k2.7-code
+      - OPENCODE_BASE_URL=https://opencode.ai/zen/go/v1
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    volumes:
+      - ./code-review-bot:/app/code-review-bot
+      - ./it-support-bot:/app/it-support-bot
+      - ./consultor-bot:/app/consultor-bot
+      - ./api:/app/api
+      - ./agente.sh:/app/agente.sh
+      # Mount host paths so the code-review agent can access them
+      - /root/projects:/host/projects:ro
+      - /root:/host/root:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 1G
