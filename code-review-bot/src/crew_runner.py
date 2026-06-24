@@ -1,16 +1,14 @@
 """Crew runner — orchestrate the code review agents."""
 
 import logging
-import os
-import sys
-from pathlib import Path
+from typing import Any, Optional
 
 from crewai import Crew, Process
 
 logger = logging.getLogger(__name__)
 
 
-def run_crew(target_dir: str, llm=None) -> str:
+def run_crew(target_dir: str, llm: Optional[Any] = None) -> str:
     """Ejecuta el crew de code review completo.
 
     Args:

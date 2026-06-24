@@ -1,9 +1,11 @@
 """Task definitions for Code Review Bot."""
 
+from typing import Any, Dict, List
+
 from crewai import Task
 
 
-def create_tasks(agents, target_dir):
+def create_tasks(agents: Dict[str, Any], target_dir: str) -> List[Task]:
     """Crea las tareas del pipeline de revisión de código."""
 
     analyze_code = Task(

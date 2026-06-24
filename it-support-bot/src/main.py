@@ -14,7 +14,7 @@ from crew_runner import run_crew
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
 
-def load_env():
+def load_env() -> None:
     """Load .env with support for quoted values and inline comments."""
     import shlex
     env_path = Path(__file__).resolve().parent.parent / ".env"
@@ -36,7 +36,7 @@ def load_env():
                 os.environ.setdefault(key, val)
 
 
-def main():
+def main() -> None:
     load_env()
 
     parser = argparse.ArgumentParser(

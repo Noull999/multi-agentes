@@ -1,11 +1,13 @@
 """Agent definitions for Code Review Bot."""
 
+from typing import Any, Dict, Optional
+
 from crewai import Agent
 from tools.code_reader import read_source_files
 from tools.reporter import generate_review_report, list_files_in_repo
 
 
-def create_agents(llm=None):
+def create_agents(llm: Optional[Any] = None) -> Dict[str, Agent]:
     """Crea los 4 agentes del Code Review Bot."""
 
     shared_config = {}

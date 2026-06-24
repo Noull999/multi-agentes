@@ -15,7 +15,7 @@ from crewai import LLM
 from crew_runner import run_crew
 
 
-def load_env():
+def load_env() -> None:
     """Load .env if it exists."""
     env_path = Path(__file__).resolve().parent.parent / ".env"
     if env_path.exists():
@@ -44,7 +44,7 @@ def test_llm_connection(api_key: str, base_url: str, model: str) -> bool:
         return False
 
 
-def main():
+def main() -> None:
     load_env()
 
     parser = argparse.ArgumentParser(

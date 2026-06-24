@@ -1,0 +1,188 @@
+Metadata-Version: 2.4
+Name: code-review-bot
+Version: 0.1.0
+Summary: Multi-agent code review bot powered by CrewAI
+Author: Code Review Bot Team
+License: MIT
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: crewai>=1.14.0
+Requires-Dist: litellm>=1.54.0
+Requires-Dist: openai>=1.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Requires-Dist: pytest-cov; extra == "dev"
+Requires-Dist: mypy; extra == "dev"
+
+# 🔍 Code Review Bot
+
+Multi-agent code review assistant powered by [CrewAI](https://www.crewai.com/). Automates architectural analysis, bug detection, style review, and documentation gap identification using a team of specialized AI agents.
+
+---
+
+## Architecture
+
+```
+                        ┌─────────────────────┐
+                        │    CLI (main.py)     │
+                        │  argparse + LLM cfg  │
+                        └─────────┬───────────┘
+                                  │
+                        ┌─────────▼───────────┐
+                        │   Crew Runner       │
+                        │  (crew_runner.py)   │
+                        │  Orchestrates flow  │
+                        └─────────┬───────────┘
+                                  │
+          ┌───────────────────────┼───────────────────────┐
+          │                       │                       │
+          ▼                       ▼                       ▼
+┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
+│   Code Analyst   │   │   Bug Hunter     │   │ Style Reviewer   │
+│ (agents.py)      │   │ (agents.py)      │   │ (agents.py)      │
+│ Architecture     │   │ Security & bugs  │   │ Best practices   │
+│ Overview         │   │                  │   │ & code smells    │
+└────────┬─────────┘   └────────┬─────────┘   └────────┬─────────┘
+         │                      │                      │
+         └──────────────────────┼──────────────────────┘
+                                │
+                        ┌───────▼──────────┐
+                        │  Documenter      │
+                        │  Synthesizes     │
+                        │  final report    │
+                        └───────┬──────────┘
+                                │
+                        ┌───────▼──────────┐
+                        │  Reporter Tool   │
+                        │  (reporter.py)   │
+                        │  → reports/*.md  │
+                        └──────────────────┘
+
+         Tools shared by agents:
+         ┌─────────────────┐  ┌───────────────────┐
+         │ ReadSourceFiles │  │ ListFilesInRepo   │
+         │ (code_reader)   │  │ (reporter)        │
+         └─────────────────┘  └───────────────────┘
+```
+
+## Agents
+
+| Agent | Role | Tools |
+|-------|------|-------|
+| **Code Analyst** | Examines architecture, structure, dependencies, and design patterns | `ReadSourceFiles`, `ListFilesInRepo` |
+| **Bug Hunter** | Finds bugs, security vulnerabilities, and logic errors | `ReadSourceFiles` |
+| **Style Reviewer** | Checks style consistency, code smells, and best practices | `ReadSourceFiles`, `ListFilesInRepo` |
+| **Documenter** | Reviews docs, generates the final markdown report | `ReadSourceFiles`, `GenerateReviewReport` |
+
+Agents execute **sequentially** — each builds on the previous agent's output.
+
+## Installation
+
+### Prerequisites
+
+- Python 3.10+
+- An LLM API key (OpenAI, Gemini, or OpenCode Go)
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/your-org/code-review-bot.git
+cd code-review-bot
+
+# Create and activate a virtual environment
+python -m venv .venv
+source .venv/bin/activate
+
+# Install the package in editable mode
+pip install -e .
+
+# (Optional) Install dev dependencies
+pip install -e ".[dev]"
+```
+
+### Environment
+
+Copy `.env.example` to `.env` and configure your LLM provider:
+
+```env
+# OpenAI
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL_NAME=gpt-4o
+OPENAI_API_BASE_URL=https://api.openai.com/v1
+
+# OR OpenCode Go
+OPENCODE_API_KEY=oc-...
+OPENCODE_MODEL=glm-5
+OPENCODE_BASE_URL=https://opencode.ai/zen/go/v1
+
+# OR Gemini
+GEMINI_API_KEY=...
+```
+
+## Usage
+
+```bash
+# Basic usage (uses OPENAI_API_KEY from .env)
+python src/main.py /path/to/project
+
+# Use OpenCode Go
+python src/main.py /path/to/project --opencode
+
+# Use OpenCode Go with a specific model
+python src/main.py /path/to/project --opencode --model deepseek-v4-flash
+
+# Use Gemini
+python src/main.py /path/to/project --gemini
+
+# Specify API key inline
+python src/main.py /path/to/project --openai-key sk-...
+```
+
+### Output
+
+The final report is saved to `reports/code-review-YYYYMMDD_HHMMSS.md`.
+
+## Configuration
+
+| Environment Variable | Default | Description |
+|---------------------|---------|-------------|
+| `OPENAI_API_KEY` | — | API key for OpenAI-compatible providers |
+| `OPENAI_MODEL_NAME` | `gpt-4o` | Model name for OpenAI |
+| `OPENAI_API_BASE_URL` | `https://api.openai.com/v1` | Base URL for OpenAI |
+| `OPENCODE_API_KEY` | — | API key for OpenCode Go |
+| `OPENCODE_MODEL` | `glm-5` | Model for OpenCode Go |
+| `OPENCODE_BASE_URL` | `https://opencode.ai/zen/go/v1` | Base URL for OpenCode Go |
+| `GEMINI_API_KEY` | — | API key for Gemini |
+| `CODE_REVIEW_OUTPUT` | `./reports` | Output directory for reports |
+| `CODE_REVIEW_TARGET` | `.` | Allowed base directory for file listing |
+
+## Development
+
+```bash
+# Install dev dependencies
+pip install -e ".[dev]"
+
+# Run tests
+pytest
+
+# Run tests with coverage
+pytest --cov=src
+
+# Type checking
+mypy src/
+
+# Run everything
+pytest && mypy src/
+```
+
+## Security Considerations
+
+- **Path traversal protection**: `ListFilesInRepo` validates the directory stays within `CODE_REVIEW_TARGET`. `ReadSourceFiles` resolves all symlinks and skips any file whose real path escapes the base directory.
+- **Symlink filtering**: Symlinks are skipped entirely to prevent arbitrary file reads.
+- **Report sandboxing**: `CODE_REVIEW_OUTPUT` is constrained to the project root — paths escaping the project are silently redirected to `./reports/`.
+- **HTML injection**: Output is sanitized (`<`, `>` escaped) before writing to reports.
+
+## License
+
+MIT

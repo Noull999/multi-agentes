@@ -3,12 +3,13 @@
 import os
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 from crewai.tools import tool
 
 # Output directory for reports — sandboxed against project root
-_CODE_REVIEW_ROOT = Path(__file__).resolve().parent.parent.parent  # project root
-_REPORTS_ENV = os.getenv("CODE_REVIEW_OUTPUT", "./reports")
-REPORTS_DIR = Path(_REPORTS_ENV).resolve()
+_CODE_REVIEW_ROOT: Path = Path(__file__).resolve().parent.parent.parent  # project root
+_REPORTS_ENV: Optional[str] = os.getenv("CODE_REVIEW_OUTPUT", "./reports")
+REPORTS_DIR: Path = Path(_REPORTS_ENV).resolve()
 # P0: constrain to project root — reject env var paths that escape
 try:
     REPORTS_DIR.relative_to(_CODE_REVIEW_ROOT)

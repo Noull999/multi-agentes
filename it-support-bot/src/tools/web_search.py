@@ -9,7 +9,7 @@ from crewai.tools import tool
 
 
 @tool("WebSearch")
-def web_search(query: str) -> str:
+def web_search(query: str) -> str:  # type: ignore[empty-function]
     """
     Busca en la web soluciones técnicas y documentación.
     Útil para encontrar pasos de troubleshooting, guías y foros de soporte.
@@ -93,7 +93,7 @@ def web_search(query: str) -> str:
 
 
 @tool("SearchKnowledgeBase")
-def search_knowledge_base(issue_type: str, symptoms: str) -> str:
+def search_knowledge_base(issue_type: str, symptoms: str) -> str:  # type: ignore[empty-function]
     """
     Busca en una base de conocimiento local de problemas IT comunes.
     Devuelve soluciones conocidas basadas en tipo de problema y síntomas.

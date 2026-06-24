@@ -1,9 +1,9 @@
 """Task definitions for IT Support Auto-Pilot."""
 
-from crewai import Task
+from crewai import Agent, Task
 
 
-def create_tasks(agents, issue: str, client: str = "Cliente"):
+def create_tasks(agents: dict[str, Agent], issue: str, client: str = "Cliente") -> list[Task]:
     """Crea las tareas del pipeline de soporte IT."""
 
     diagnosticar = Task(

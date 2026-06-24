@@ -1,0 +1,8 @@
+crewai>=1.14.0
+litellm>=1.54.0
+openai>=1.0.0
+
+[dev]
+pytest>=8.0
+pytest-cov
+mypy

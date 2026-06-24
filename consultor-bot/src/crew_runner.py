@@ -3,13 +3,14 @@
 import logging
 import os
 from pathlib import Path
+from typing import Any
 
 from crewai import Crew, Process
 
 logger = logging.getLogger(__name__)
 
 
-def run_crew(client_input: str, llm=None) -> str:
+def run_crew(client_input: str, llm: Any = None) -> str:
     """Ejecuta el pipeline completo de consultoría."""
 
     from agents import create_agents

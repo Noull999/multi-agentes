@@ -1,11 +1,13 @@
 """Agent definitions for IT Support Auto-Pilot."""
 
-from crewai import Agent
+from typing import Optional
+
+from crewai import Agent, LLM
 from tools.web_search import web_search, search_knowledge_base
 from tools.report_generator import generate_support_report
 
 
-def create_agents(llm=None):
+def create_agents(llm: Optional[LLM] = None) -> dict[str, Agent]:
     """Crea los 4 agentes del IT Support Auto-Pilot."""
 
     shared_config = {}

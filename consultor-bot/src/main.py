@@ -15,7 +15,7 @@ from crew_runner import run_crew
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
 
-def load_env():
+def load_env() -> None:
     env_path = Path(__file__).resolve().parent.parent / ".env"
     if env_path.exists():
         for line in env_path.read_text().splitlines():
@@ -42,7 +42,7 @@ def test_llm_connection(api_key: str, base_url: str, model: str) -> bool:
         return False
 
 
-def main():
+def main() -> None:
     load_env()
 
     parser = argparse.ArgumentParser(

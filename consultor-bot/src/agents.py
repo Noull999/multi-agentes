@@ -1,5 +1,7 @@
 """Agent definitions for Consultor Full-Stack Automatizado."""
 
+from typing import Any
+
 from crewai import Agent
 from tools.project_tools import (
     generate_proposal_document,
@@ -8,7 +10,7 @@ from tools.project_tools import (
 )
 
 
-def create_agents(llm=None):
+def create_agents(llm: Any = None) -> dict[str, Agent]:
     """Crea los 5 agentes del pipeline de consultoría."""
 
     shared = {}

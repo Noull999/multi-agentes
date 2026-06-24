@@ -3,11 +3,11 @@
 import os
 import fnmatch
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Set
 from crewai.tools import tool
 
 # Extensions que analizamos
-TARGET_EXTENSIONS = {
+TARGET_EXTENSIONS: Set[str] = {
     ".ts", ".tsx", ".js", ".jsx", ".mjs",
     ".py", ".rs", ".go", ".java", ".kt",
     ".vue", ".svelte",
@@ -16,7 +16,7 @@ TARGET_EXTENSIONS = {
 }
 
 # Archivos/dirs a ignorar
-IGNORE_PATTERNS = {
+IGNORE_PATTERNS: Set[str] = {
     "node_modules", ".git", ".next", ".vercel", "dist", "build",
     ".venv", "venv", "__pycache__", ".cache",
     "*.min.*", "*.bundle.*", "*.map",
@@ -24,8 +24,8 @@ IGNORE_PATTERNS = {
     ".env", ".env.*",
 }
 
-MAX_FILE_SIZE = 100 * 1024  # 100KB
-MAX_FILES = 50  # máx archivos por tanda
+MAX_FILE_SIZE: int = 100 * 1024  # 100KB
+MAX_FILES: int = 50  # máx archivos por tanda
 
 
 def _should_ignore(base: Path, path: str, name: str) -> bool:

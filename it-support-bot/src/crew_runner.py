@@ -4,13 +4,14 @@ import logging
 import os
 import sys
 from pathlib import Path
+from typing import Optional
 
-from crewai import Crew, Process
+from crewai import Crew, LLM, Process
 
 logger = logging.getLogger(__name__)
 
 
-def run_crew(issue: str, llm=None) -> str:
+def run_crew(issue: str, llm: Optional[LLM] = None) -> str:
     """Ejecuta el crew de soporte IT completo."""
 
     from agents import create_agents

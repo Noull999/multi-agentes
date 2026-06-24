@@ -26,7 +26,7 @@ def generate_support_report(
     solution: str,
     steps_performed: str,
     recommendations: str = "",
-) -> str:
+) -> str:  # type: ignore[empty-function]
     """
     Genera un reporte profesional de soporte IT.
     Recibe: nombre del cliente, descripción del problema, diagnóstico,

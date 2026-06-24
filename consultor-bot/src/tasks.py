@@ -1,9 +1,9 @@
 """Task definitions for Consultor Full-Stack Automatizado."""
 
-from crewai import Task
+from crewai import Agent, Task
 
 
-def create_tasks(agents, client_input: str):
+def create_tasks(agents: dict[str, Agent], client_input: str) -> list[Task]:
     """Crea las 5 tareas del pipeline de consultoría."""
 
     analizar = Task(
