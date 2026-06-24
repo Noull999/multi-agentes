@@ -22,6 +22,10 @@ from typing import Optional
 
 TRACKER_FILE = Path.home() / ".hermes" / "token_usage.json"
 
+# Límite por sesión de OpenCode Go: 1M tokens cada 5h
+SESSION_LIMIT = 1_000_000
+SESSION_WINDOW_HOURS = 5
+
 
 def _load() -> dict:
     if TRACKER_FILE.exists():
@@ -76,17 +80,99 @@ def get_recent_calls(limit: int = 5) -> list:
     return data["calls"][-limit:]
 
 
+def get_session_usage() -> dict:
+    """Retorna uso de tokens en la ventana actual de 5h."""
+    from datetime import timedelta
+    data = _load()
+    now = datetime.now()
+    window_start = now - timedelta(hours=SESSION_WINDOW_HOURS)
+
+    session_total = 0
+    session_prompt = 0
+    session_completion = 0
+    session_count = 0
+
+    for c in data["calls"]:
+        try:
+            ts = c["timestamp"]
+            if isinstance(ts, str):
+                # Strip timezone info if present
+                ts = ts.replace("Z", "")
+                if "+" in ts or ts.endswith("+00:00"):
+                    ts = ts.split("+")[0]
+                c_time = datetime.fromisoformat(ts)
+            else:
+                continue
+            if c_time >= window_start:
+                session_total += c.get("total_tokens", 0)
+                session_prompt += c.get("prompt_tokens", 0)
+                session_completion += c.get("completion_tokens", 0)
+                session_count += 1
+        except (ValueError, TypeError):
+            continue
+
+    # Calcular tiempo hasta recarga desde la última llamada
+    last_call_ts = window_start
+    if data["calls"]:
+        for c in reversed(data["calls"]):
+            try:
+                ts = c["timestamp"]
+                if isinstance(ts, str):
+                    ts = ts.replace("Z", "")
+                    if "+" in ts or ts.endswith("+00:00"):
+                        ts = ts.split("+")[0]
+                    c_time = datetime.fromisoformat(ts)
+                    last_call_ts = c_time
+                    break
+            except (ValueError, TypeError):
+                continue
+
+    next_reset = last_call_ts + timedelta(hours=SESSION_WINDOW_HOURS)
+    remaining_secs = max(0, (next_reset - now).total_seconds())
+    remaining_hours = round(remaining_secs / 3600, 1)
+
+    return {
+        "calls": session_count,
+        "prompt_tokens": session_prompt,
+        "completion_tokens": session_completion,
+        "total_tokens": session_total,
+        "limit": SESSION_LIMIT,
+        "remaining_tokens": max(0, SESSION_LIMIT - session_total),
+        "remaining_hours": remaining_hours,
+        "next_reset": next_reset.isoformat(),
+    }
+
+
 def format_stats() -> str:
     """Formatea estadísticas como texto legible."""
     stats = get_stats()
+    session = get_session_usage()
     if not stats:
         return "📊 *Token Usage*\n\nNo hay registros aún. Los tokens se empiezan a contar desde que instalas el tracker."
 
-    lines = ["📊 **Token Usage por Modelo**\n"]
+    lines = ["📊 **Token Usage — Sesión OpenCode Go**\n"]
+
+    # Barra de progreso de sesión
+    pct = (session["total_tokens"] / session["limit"]) * 100 if session["limit"] > 0 else 0
+    bar_len = 20
+    filled = int(bar_len * pct / 100)
+    bar = "█" * filled + "░" * (bar_len - filled)
+
+    lines.append(f"**Sesión 5h ({SESSION_WINDOW_HOURS}h — límite {SESSION_LIMIT:,} tokens)**")
+    lines.append(f"  {bar}  {pct:.1f}%")
+    lines.append(f"  Usado: {session['total_tokens']:,} / {session['limit']:,} tokens")
+    lines.append(f"  Restante: {session['remaining_tokens']:,} tokens")
+    lines.append(f"  Recarga: ~{session['remaining_hours']}h")
+    lines.append(f"  Llamadas en sesión: {session['calls']}")
+    lines.append("")
+
+    # Per-model breakdown
+    lines.append("**Por modelo (histórico total)**")
     total_all = {"calls": 0, "prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
 
     for model, info in sorted(stats.items()):
-        lines.append(f"▸ *{model}*")
+        short_model = model.replace("openai/", "")
+        lines.append(f"▸ *{short_model}*")
         lines.append(f"  Llamadas: {info['calls']}")
         lines.append(f"  Prompt: {info['prompt_tokens']:,} tokens")
         lines.append(f"  Completion: {info['completion_tokens']:,} tokens")
