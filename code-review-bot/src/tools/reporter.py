@@ -1,6 +1,5 @@
 """Tool: generate structured reports."""
 
-import html
 import os
 from datetime import datetime
 from pathlib import Path
@@ -35,7 +34,9 @@ def generate_review_report(report_content: str) -> str:
 
 """
 
-    full = header + html.escape(report_content, quote=False)
+    # P0: escape only < > to prevent HTML injection without corrupting markdown
+    safe_content = report_content.replace("<", "&lt;").replace(">", "&gt;")
+    full = header + safe_content
     out_path = REPORTS_DIR / filename
 
     try:

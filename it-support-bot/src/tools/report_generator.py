@@ -1,6 +1,5 @@
 """Tool: generate professional IT support reports."""
 
-import html
 import os
 import re
 from datetime import datetime
@@ -88,8 +87,8 @@ def generate_support_report(
     try:
         REPORTS_DIR.mkdir(parents=True, exist_ok=True)
         out_path = REPORTS_DIR / filename
-        # P0: escape HTML to prevent stored XSS in generated reports
-        safe_report = html.escape(report, quote=False)
+        # P0: escape only < > to prevent HTML injection without corrupting markdown
+        safe_report = report.replace("<", "&lt;").replace(">", "&gt;")
         out_path.write_text(safe_report, encoding="utf-8")
         return f"✅ Reporte guardado: {out_path}"
     except Exception as e:
