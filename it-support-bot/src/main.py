@@ -7,9 +7,15 @@ import argparse
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+# Agregar token_tracker al path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from crewai import LLM
 from crew_runner import run_crew
+
+# Token usage tracking — parchea litellm.completion automáticamente
+from token_tracker import patch_litellm
+patch_litellm(project_name="it-support")
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
