@@ -4,7 +4,8 @@ services:
     build: .
     container_name: consultor-fullstack
     environment:
-      - OPENCODE_API_KEY=***      - OPENCODE_MODEL=kimi-k2.7-code
+      - OPENCODE_API_KEY=${OPENCODE_API_KEY}
+      - OPENCODE_MODEL=kimi-k2.7-code
       - OPENCODE_BASE_URL=https://opencode.ai/zen/go/v1
     restart: unless-stopped
     entrypoint: ["tail", "-f", "/dev/null"]

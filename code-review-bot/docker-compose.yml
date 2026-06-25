@@ -8,6 +8,7 @@ services:
       - OPENCODE_API_KEY=${OPENCODE_API_KEY}
       - OPENCODE_MODEL=kimi-k2.7-code
       - OPENCODE_BASE_URL=https://opencode.ai/zen/go/v1
+      - CODE_REVIEW_TARGET=/host/projects
     volumes:
       - /root/projects:/host/projects:ro
     working_dir: /app
