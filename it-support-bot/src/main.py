@@ -13,9 +13,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from crewai import LLM
 from crew_runner import run_crew
 
-# Token usage tracking — parchea litellm.completion automáticamente
-from token_tracker import patch_litellm
-patch_litellm(project_name="it-support")
+try:
+    from token_tracker import patch_litellm
+    patch_litellm(project_name="it-support")
+except ImportError:
+    pass  # token_tracker opcional (no disponible en Docker sin hermes)
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 

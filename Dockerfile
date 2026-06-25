@@ -13,6 +13,7 @@ COPY code-review-bot/ /app/code-review-bot/
 COPY it-support-bot/ /app/it-support-bot/
 COPY consultor-bot/ /app/consultor-bot/
 COPY api/ /app/api/
+COPY agente.sh /app/agente.sh
 
 # Create symlinks for the CLI launcher
 RUN ln -sf /app/agente.sh /usr/local/bin/agentes

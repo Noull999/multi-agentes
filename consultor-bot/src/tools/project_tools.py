@@ -246,28 +246,41 @@ def scaffold_project(
             f"{project_name}/docker-compose.yml": "version: '3.9'\nservices:\n  backend:\n    build: ./backend\n    ports:\n      - '8000:8000'\n  frontend:\n    build: ./frontend\n    ports:\n      - '3000:3000'\n    depends_on:\n      - backend\n",
         }
 
-    # Crear directorios
+    # Crear directorios — siempre bajo OUTPUT_BASE
     created_dirs = []
     for dirpath in structure:
-        Path(dirpath).mkdir(parents=True, exist_ok=True)
+        full = (OUTPUT_BASE / dirpath).resolve()
+        if not full.is_relative_to(OUTPUT_BASE.resolve()):
+            continue  # no debería pasar, pero por seguridad
+        full.mkdir(parents=True, exist_ok=True)
         created_dirs.append(dirpath)
 
-    # Crear archivos base
+    # Crear archivos base — siempre bajo OUTPUT_BASE
     created_files = []
     for fpath, content in boot_files.items():
         content = content.replace("{{PROJECT_NAME}}", project_name)
-        Path(fpath).write_text(content, encoding="utf-8")
+        full = (OUTPUT_BASE / fpath).resolve()
+        if not full.is_relative_to(OUTPUT_BASE.resolve()):
+            continue
+        full.parent.mkdir(parents=True, exist_ok=True)
+        full.write_text(content, encoding="utf-8")
         created_files.append(fpath)
 
-    tree = []
-    tree.append(f"📁 {project_name}/")
+    tree = [f"📁 {project_name}/  (guardado en {OUTPUT_BASE / safe_name})"]
     for d in sorted(created_dirs):
-        indent = "  " * (len(Path(d).relative_to(project_name).parts))
-        tree.append(f"{indent}📁 {Path(d).name}/")
+        try:
+            rel = Path(d).relative_to(project_name)
+            indent = "  " * len(rel.parts)
+            tree.append(f"{indent}📁 {Path(d).name}/")
+        except ValueError:
+            pass
     for f in sorted(created_files):
-        rel = Path(f).relative_to(project_name)
-        indent = "  " * (len(rel.parents) - 1)
-        tree.append(f"{indent}📄 {rel.name}")
+        try:
+            rel = Path(f).relative_to(project_name)
+            indent = "  " * (len(rel.parents) - 1)
+            tree.append(f"{indent}📄 {rel.name}")
+        except ValueError:
+            pass
 
     return f"✅ Proyecto '{project_name}' creado ({project_type})\n\n" + "\n".join(tree)
 

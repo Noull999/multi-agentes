@@ -3,7 +3,7 @@
 # Uso: ./agente.sh
 # También: ./agente.sh review|support|consultor [args...]
 
-BOT_DIR="/root/multi-agentes"
+BOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VENV="source .venv/bin/activate"
 
 show_menu() {

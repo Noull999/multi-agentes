@@ -18,7 +18,7 @@ def create_agents(llm: Any = None) -> dict[str, Agent]:
         shared["llm"] = llm
 
     analista = Agent(
-        role="Requeriments Analyst",
+        role="Requirements Analyst",
         goal=(
             "Analyze the client's raw problem description and extract structured "
             "requirements. Identify: project type, functional requirements, technical "

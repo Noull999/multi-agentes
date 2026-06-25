@@ -4,6 +4,7 @@ Expone los 3 agentes como endpoints REST
 """
 
 import os
+import shlex
 import subprocess
 import json
 from pathlib import Path
@@ -50,7 +51,8 @@ class ConsultorRequest(BaseModel):
 
 def run_agent(proj: str, cmd: list, timeout: int = 600):
     """Run an agent and return its output."""
-    full_cmd = f"cd {BASE}/{proj} && {VENV} && " + " ".join(cmd)
+    safe_cmd = " ".join(shlex.quote(str(arg)) for arg in cmd)
+    full_cmd = f"cd {BASE}/{proj} && {VENV} && {safe_cmd}"
     try:
         result = subprocess.run(
             ["bash", "-c", full_cmd],
