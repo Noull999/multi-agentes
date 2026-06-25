@@ -14,6 +14,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - BRAVE_API_KEY=${BRAVE_API_KEY:-}
       - CODE_REVIEW_TARGET=/host/projects
+      - API_KEY=${API_KEY:-}
     volumes:
       - ./code-review-bot:/app/code-review-bot
       - ./it-support-bot:/app/it-support-bot
